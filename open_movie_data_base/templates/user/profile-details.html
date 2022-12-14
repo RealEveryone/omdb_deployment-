@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load user_type %}
+{% load cloudinary %}
+{% load static %}
+{% block body %}
+    <section class="h-100 gradient-custom-2">
+        <div class="container py-5 h-100">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col col-lg-9 col-xl-7">
+                    <div class="card">
+                        {# generic info #}
+                        <div class="rounded-top text-white d-flex flex-row"
+                             style="background-image: url({% static "images/Background-Narrow.jpg" %})">
+                            <div class="ms-4 mt-2 d-flex flex-column" style="width: 150px;">
+                                {% if object.profile_picture %}
+                                    <div class="img-fluid img-thumbnail mt-4 mb-2" style="width: 150px; z-index: 1">
+                                        {% cloudinary object.profile_picture width=140 height=120 %}
+                                    </div>
+                                {% else %}
+                                    <img src='{% static 'images/user-profile.png' %}'
+                                         alt="Generic placeholder image" class="img-fluid img-thumbnail mt-4 mb-2"
+                                         style="width: 150px; z-index: 1">
+                                {% endif %}
+                                {% if request.user  == object.user %}
+                                    <form action="{% url object.user|edit_profile_url object.slug %}">
+                                        {#                                    {% if object.user.is_movie_director %}#}
+                                        {#                                        <form action="{% url 'edit-movie-director' object.slug %}">#}
+                                        {#                                    {% elif request.user.is_actor %}#}
+                                        {#                                        <form action="{% url 'edit-actor' object.slug %}">#}
+                                        {#                                    {% elif request.user.is_regular_user %}#}
+                                        {#                                        <form action="{% url 'edit-profile' object.slug %}">#}
+                                        {#                                    {% endif %}#}
+
+                                        {% if object.first_name and object.last_name %}
+                                            <button class="btn btn btn-outline-success" data-mdb-ripple-color="dark"
+                                                    style="z-index: 2;">
+                                                Edit profile
+                                            </button>
+
+                                        {% else %}
+                                            <button class="btn btn btn-outline-warning" data-mdb-ripple-color="dark"
+                                                    style="z-index: 2;">
+                                                Complete profile
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                {% endif %}
+
+
+                            </div>
+                            <div class="ms-3" style="margin-top: 90px;">
+                                {% if object.birth_date %}
+                                    {{ object.birth_date }}<br>
+                                {% endif %}
+                                {% if object.first_name and object.last_name %}
+                                    {{ object.get_full_name }}
+                                {% endif %}
+                                <h6>Username: {{ object.user.username }}</h6>
+                            </div>
+
+                        </div>
+                        {# selected info #}
+                        {% if object.user.is_movie_director %}
+                            {% include 'user/partials/movie_director/atributes.html' with overall_rating=overall_rating like=like movies_count=movies_count %}
+                        {% endif %}
+                        {% if object.user.is_actor %}
+                            {% include 'user/partials/actor/atributes.html' with stars_in=stars_in known_for=known_for %}
+                        {% endif %}
+                        <hr>
+                        {% if object.user.is_regular_user %}
+                            <div class="p-4 text-black" style="background-color: #f8f9fa;">
+                                <div class="d-flex">
+                                    <div class="p-1">
+                                        <p class="mb-1 h3">{{ liked_movies }}</p>
+                                        <p class="small text-muted mb-0">Liked movies</p>
+                                    </div>
+                                    <div class="p-1">
+                                        <p class="mb-1 h3">{{ posted_reviews }}</p>
+                                        <p class="small text-muted mb-0">Posted Reviews</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body p-4 text-black">
+                                {% if object.description %}
+                                    {{ object.description }}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        <div class="card-body p-4 text-black">
+
+                            {% if object.user.is_movie_director or object.user.is_actor %}
+                                {% include 'user/partials/movie_crew/biography-filmography.html' %}
+                            {% endif %}
+                            <hr>
+                            {% if object.user.is_movie_director %}
+                                {% include 'user/partials/movie_director/body-description.html' %}
+                            {% endif %}
+                            {% if object.user.is_actor %}
+                                {% include 'user/partials/actor/body-description.html' with stars_in=stars_in %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
